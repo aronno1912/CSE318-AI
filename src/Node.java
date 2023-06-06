@@ -176,18 +176,7 @@ public class Node {
 
       return children;
     }
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        Node that = (Node) o;
-//        return Arrays.equals(board, that.board);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Arrays.deepHashCode(board);
-//    }
+
 
 
 }

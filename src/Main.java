@@ -80,7 +80,25 @@ public class Main {
 
     }
 
-    public static void main(String[] args) {
+    private static void printSteps(Node currNode) {
+
+        if (currNode == null) return;
+
+        printSteps(currNode.parent);
+        //System.out.println(currNode);
+        for (int i = 0; i < currNode.n; i++) {
+            for (int j = 0; j< currNode.n; j++)
+            {
+                System.out.print(" "+currNode.board[i][j]+" ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
+    }
+
+
+        public static void main(String[] args) {
 
         Scanner scanner=new Scanner(System.in);
         int n= scanner.nextInt();
@@ -137,6 +155,8 @@ public class Main {
                  }
              }
          }
+
+         printSteps(currNode);
 
 
 
