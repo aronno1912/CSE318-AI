@@ -1,5 +1,16 @@
+import java.sql.SQLOutput;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
+
+ class ManhattanComparator implements Comparator <Node> {
+    @Override
+    public int compare(Node o1, Node o2) {
+        return Integer.compare(o1.cost + o1.manhattanCost(), o2.cost + o2.manhattanCost());
+    }
+}
 public class Main {
 
     public static boolean check(int n,int[][]board)
@@ -27,7 +38,7 @@ public class Main {
                     ic++;
             }
         }
-        System.out.println("ic is  "+ic);
+       // System.out.println("ic is  "+ic);
         //==============find the row distance of blank to goal position
 
 
@@ -91,7 +102,45 @@ public class Main {
 //            }
 //        }
 
-     if(!check(n,board)) System.out.println("not");
+     if(!check(n,board)) System.out.println("Unsolvable Case");
+     else
+     {
+         Node root= new Node(n, board, 0, null);
+         Node currNode=root;
+         int expandedNodes=1; // those who have entered the queue, the root node
+         int exploredNodes=0; // those who have exited the queue
+         ManhattanComparator mc=new ManhattanComparator();
+         PriorityQueue<Node>queue=new PriorityQueue <>(mc); // queue is based on manhattan cost... jar cost kom shey age exit hobe
+         HashSet<Node> alreadyDoneNodes= new HashSet <>(); // closed list
+         queue.add(root);
+         while (!queue.isEmpty())
+         {
+             currNode=queue.poll();
+             expandedNodes++;
+             //System.out.println("here  ");
+             if(currNode.achievementUnlocked())
+             {
+                 System.out.println("Puzzled solved!!!!");
+                 System.out.println("Total Moves= "+currNode.cost);
+                 break;
+             }
+
+             alreadyDoneNodes.add(currNode);
+             //check if children are already expanded or not...if not add them to the queue
+             for (Node node : currNode.getChildrenNodes()) {
+                // System.out.println(node.board);
+
+
+                 if(!alreadyDoneNodes.contains(node)) {
+                     expandedNodes++;
+                     queue.add(node);
+                 }
+             }
+         }
+
+
+
+     }
 
     }
 }
