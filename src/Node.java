@@ -103,6 +103,8 @@ public class Node {
         return b;
     }
 
+    //basically a move ....want to move the blank to which position
+
     void swapPos(int r1, int c1, int r2, int c2)
     {
         int x = board[r1][c1];

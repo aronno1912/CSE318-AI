@@ -23,6 +23,10 @@ class HammingComp implements Comparator <Node> {
 }
 public class Main {
 
+     private static int totalMoves;
+
+     /*************  to check if the puzzle is unsolvable       *************/
+
     public static boolean check(int n,int[][]board)
     {
         int ic=0; //inversion count
@@ -70,7 +74,7 @@ public class Main {
         //System.out.println(rowDistanceofBlank);
 
 
-        //if dimension n=odd
+        /****************   if dimension n=odd  *************/
         if(n%2!=0)
         {
 
@@ -78,6 +82,8 @@ public class Main {
             else
                 return false;
         }
+
+        /****************   if dimension n=even  *************/
 
         // when dimension is even,need to check blank's row distance also
         else
@@ -111,6 +117,8 @@ public class Main {
     }
 
 
+    /****************  when the puzzle is solvable, solve it  *************/
+
     private static void doCalculation(int n,int[][]board,int choice)
     {
 
@@ -143,11 +151,12 @@ public class Main {
             {
                 System.out.println("Puzzled solved!!!!");
                 System.out.println("Total Moves= "+currNode.cost);
+                totalMoves=currNode.cost;
                 break;
             }
 
             alreadyDoneNodes.add(currNode);
-            expandedNodes++;/////////==============?
+            expandedNodes++;
             //check if children are already expanded or not...if not add them to the queue
             for (Node Childnode : currNode.getChildrenNodes())
 
@@ -157,13 +166,15 @@ public class Main {
 
                 if(!alreadyDoneNodes.contains(Childnode))
                 {
-                    exploredNodes++; ///================?
+                    exploredNodes++;
                     queue.add(Childnode);
                 }
             }
         }
 
         printSteps(currNode);
+        System.out.println("Total Moves= "+currNode.cost);
+        System.out.println("Total Moves= "+totalMoves);
         if (choice==0)
             System.out.println("In Manhattan process");
         else
