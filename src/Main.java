@@ -5,10 +5,20 @@ import java.util.PriorityQueue;
 import java.util.Scanner;
 
 
- class ManhattanComparator implements Comparator <Node> {
+ class ManhattanComp implements Comparator <Node> {
     @Override
     public int compare(Node o1, Node o2) {
         return Integer.compare(o1.cost + o1.manhattanCost(), o2.cost + o2.manhattanCost());
+    }
+
+
+}
+
+
+class HammingComp implements Comparator <Node> {
+    @Override
+    public int compare(Node o1, Node o2) {
+        return Integer.compare(o1.cost + o1.hammingCost(), o2.cost + o2.hammingCost());
     }
 }
 public class Main {
@@ -49,12 +59,14 @@ public class Main {
             {
                 if(board[j][l]==0)
                 {
+
                     blankPos=j;
+                   // System.out.println("blank pos is "+blankPos);
                     break;
                 }
             }
         }
-        int rowDistanceofBlank=n-blankPos;  //with respect to goal position of blank
+        int rowDistanceofBlank=n-1-blankPos;  //with respect to goal position of blank
         //System.out.println(rowDistanceofBlank);
 
 
@@ -71,6 +83,7 @@ public class Main {
         else
 
         {
+           // System.out.println("dfgh "+(ic+rowDistanceofBlank));
            if((ic+rowDistanceofBlank)%2==0) return true;
            else return false;
 
@@ -95,6 +108,70 @@ public class Main {
         }
         System.out.println();
         System.out.println();
+    }
+
+
+    private static void doCalculation(int n,int[][]board,int choice)
+    {
+
+
+        Node root= new Node(n, board, 0, null);
+        Node currNode=root;
+        int expandedNodes=1; // those who have entered the queue, the root node
+        int exploredNodes=0; // those who have exited the queue
+        PriorityQueue<Node>queue;
+        ManhattanComp mc=new ManhattanComp();
+        HammingComp hc= new HammingComp();
+        if (choice==0)
+        {
+            queue=new PriorityQueue <>(mc);  // queue is based on manhattan cost... jar cost kom shey age exit hobe
+            System.out.println();
+
+        }
+        else
+        queue=new PriorityQueue <>(hc);
+        HashSet<Node> alreadyDoneNodes= new HashSet <>(); // closed list
+        queue.add(root);
+        while (!queue.isEmpty())
+        {
+            currNode=queue.poll();
+            //currNode.determineBlankPosition();
+            //System.out.println("the b position is "+currNode.blankRow+","+currNode.blankCol);
+
+            //System.out.println("here  ");
+            if(currNode.achievementUnlocked())
+            {
+                System.out.println("Puzzled solved!!!!");
+                System.out.println("Total Moves= "+currNode.cost);
+                break;
+            }
+
+            alreadyDoneNodes.add(currNode);
+            expandedNodes++;/////////==============?
+            //check if children are already expanded or not...if not add them to the queue
+            for (Node Childnode : currNode.getChildrenNodes())
+
+            {
+                // System.out.println(node.board);
+
+
+                if(!alreadyDoneNodes.contains(Childnode))
+                {
+                    exploredNodes++; ///================?
+                    queue.add(Childnode);
+                }
+            }
+        }
+
+        printSteps(currNode);
+        if (choice==0)
+            System.out.println("In Manhattan process");
+        else
+            System.out.println("In Hamming process");
+            System.out.println("explored nodes "+exploredNodes);
+        System.out.println("expanded nodes "+expandedNodes);
+
+
     }
 
 
@@ -123,41 +200,10 @@ public class Main {
      if(!check(n,board)) System.out.println("Unsolvable Case");
      else
      {
-         Node root= new Node(n, board, 0, null);
-         Node currNode=root;
-         int expandedNodes=1; // those who have entered the queue, the root node
-         int exploredNodes=0; // those who have exited the queue
-         ManhattanComparator mc=new ManhattanComparator();
-         PriorityQueue<Node>queue=new PriorityQueue <>(mc); // queue is based on manhattan cost... jar cost kom shey age exit hobe
-         HashSet<Node> alreadyDoneNodes= new HashSet <>(); // closed list
-         queue.add(root);
-         while (!queue.isEmpty())
-         {
-             currNode=queue.poll();
-             expandedNodes++;
-             //System.out.println("here  ");
-             if(currNode.achievementUnlocked())
-             {
-                 System.out.println("Puzzled solved!!!!");
-                 System.out.println("Total Moves= "+currNode.cost);
-                 break;
-             }
 
-             alreadyDoneNodes.add(currNode);
-             //check if children are already expanded or not...if not add them to the queue
-             for (Node node : currNode.getChildrenNodes()) {
-                // System.out.println(node.board);
+     //doCalculation(n,board,1); //eta dile hamming diye
 
-
-                 if(!alreadyDoneNodes.contains(node)) {
-                     expandedNodes++;
-                     queue.add(node);
-                 }
-             }
-         }
-
-         printSteps(currNode);
-
+     doCalculation(n,board,0); //eta dile manhattan diye korbe
 
 
      }
