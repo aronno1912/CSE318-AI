@@ -1,0 +1,105 @@
+private void handleFileUploadFromConsole() throws IOException {
+        BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Enter the file path: ");
+        String filePath = consoleReader.readLine();
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            System.out.println("File does not exist.");
+            return;
+        }
+
+        System.out.println("Specify file visibility (public/private): ");
+        String visibility = consoleReader.readLine();
+
+        String filename = file.getName();
+        long fileSize = file.length();
+        writer.println("u");
+        writer.println(filename); //to send commands and data to server
+        writer.println(visibility);     // public or private
+        writer.println(fileSize);
+
+
+
+        String serverResponse = reader.readLine(); // Read server response
+        if (serverResponse.equals("OK")) {
+            long totalChunks = (fileSize + MAX_CHUNK_SIZE - 1) / MAX_CHUNK_SIZE;
+            writer.println(totalChunks); // Send total number of chunks to server
+
+            long remainingSize = fileSize;
+            long chunkSize;
+            long fileId = System.currentTimeMillis(); // Generate file ID
+
+            for (int chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                chunkSize = Math.min(MAX_CHUNK_SIZE, remainingSize);
+
+                writer.println(fileId); // Send file ID to server
+                writer.println(chunkSize); // Send chunk size to server
+
+                try (BufferedInputStream fileInputStream = new BufferedInputStream(new FileInputStream(file))) {
+                    long bytesRead = 0;
+                    byte[] buffer = new byte[(int) chunkSize];
+                    while (bytesRead < chunkSize) {
+                        int bytes = fileInputStream.read(buffer, (int) bytesRead, (int) (chunkSize - bytesRead));
+                        if (bytes == -1) {
+                            break;
+                        }
+                        bytesRead += bytes;
+                    }
+
+                    //writer.write(buffer, 0, (int) chunkSize);
+                    //
+                    // Send chunk data to server
+
+                    OutputStream outputStream = socket.getOutputStream();
+                    outputStream.write(buffer, 0, (int) chunkSize);
+                    outputStream.flush();
+                    writer.flush();
+                }
+
+                remainingSize -= chunkSize;
+            }
+
+            String finalResponse = reader.readLine(); // Read final server response
+            System.out.println("Server response: " + finalResponse);
+        } else {
+            System.out.println("Server rejected the file upload.");
+        }
+
+
+
+
+
+//        try (BufferedInputStream fileInputStream = new BufferedInputStream(new FileInputStream(file))) {
+//            byte[] buffer = new byte[4096];  // Adjust the buffer size as per your requirements
+//            int bytesRead;
+//            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+//                writer.println(new String(buffer, 0, bytesRead));
+//            }
+//
+//            writer.println(END_OF_FILE_MARKER);
+//        }
+//        writer.flush();
+//        String response = reader.readLine(); //server er response pawar jonno
+//        System.out.println("Server response: " + response);
+
+
+
+
+
+    }
+
+
+
+    clientHandler class er upload e chilo
+
+
+    //        try (BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+    //            String line;
+    //            while ((line = reader.readLine()) != null && !line.equals(END_OF_FILE_MARKER)) {
+    //                byte[] buffer = line.getBytes();
+    //                fileOutputStream.write(buffer);
+    //            }
+    //
+    //            fileOutputStream.flush();  // Flush the file output stream( nao dite pari)
+    //        }

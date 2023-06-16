@@ -173,8 +173,8 @@ public class Main {
         }
 
         printSteps(currNode);
-        System.out.println("Total Moves= "+currNode.cost);
-        System.out.println("Total Moves= "+totalMoves);
+        //System.out.println("Total Moves= "+currNode.cost);
+       // System.out.println("Total Moves= "+totalMoves);
         if (choice==0)
             System.out.println("In Manhattan process");
         else
