@@ -14,7 +14,6 @@ import java.util.Scanner;
 
 }
 
-
 class HammingComp implements Comparator <Node> {
     @Override
     public int compare(Node o1, Node o2) {
@@ -53,8 +52,10 @@ public class Main {
             }
         }
        // System.out.println("ic is  "+ic);
-        //==============find the row distance of blank to goal position
 
+
+
+        //==============find the row distance of blank to goal position
 
         int blankPos=-1;
         for (int j = 0; j < n; j++)
@@ -75,6 +76,9 @@ public class Main {
 
 
         /****************   if dimension n=odd  *************/
+        /**      ic need to be even       **/
+
+
         if(n%2!=0)
         {
 
@@ -84,6 +88,8 @@ public class Main {
         }
 
         /****************   if dimension n=even  *************/
+
+        /**        ic+row distance of blank from the goal blank position must be even                     **/
 
         // when dimension is even,need to check blank's row distance also
         else
@@ -125,8 +131,8 @@ public class Main {
 
         Node root= new Node(n, board, 0, null);
         Node currNode=root;
-        int expandedNodes=1; // those who have entered the queue, the root node
-        int exploredNodes=0; // those who have exited the queue
+        int expandedNodes=0; // those who have exited from the queue (that means their children are now pushed in the queue)
+        int exploredNodes=1; // nodes those have entered in the queue at any time, considering the root node is in the queue already
         PriorityQueue<Node>queue;
         ManhattanComp mc=new ManhattanComp();
         HammingComp hc= new HammingComp();
@@ -157,6 +163,7 @@ public class Main {
 
             alreadyDoneNodes.add(currNode);
             expandedNodes++;
+
             //check if children are already expanded or not...if not add them to the queue
             for (Node Childnode : currNode.getChildrenNodes())
 
@@ -171,7 +178,12 @@ public class Main {
                 }
             }
         }
+        if (choice==0)
+            System.out.println("Process Manhattan: ");
+        else
+            System.out.println("Process Hamming: ");
 
+        System.out.println();
         printSteps(currNode);
         //System.out.println("Total Moves= "+currNode.cost);
        // System.out.println("Total Moves= "+totalMoves);
@@ -212,9 +224,10 @@ public class Main {
      else
      {
 
-     //doCalculation(n,board,1); //eta dile hamming diye
+
 
      doCalculation(n,board,0); //eta dile manhattan diye korbe
+     doCalculation(n,board,1); //eta dile hamming diye
 
 
      }

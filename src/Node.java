@@ -55,7 +55,7 @@ public class Node {
         {
             for (int j = 0; j < n; j++)
             {
-                if ((board[i][j]!=0) && (board[i][j]!=goalBoard[i][j])) hamCost++;
+                if ((board[i][j]!=0) && (board[i][j]!=goalBoard[i][j])) hamCost++;    //how many are in wrong position
             }
         }
         return hamCost;
