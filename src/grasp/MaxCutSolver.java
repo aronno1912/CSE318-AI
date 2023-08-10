@@ -12,7 +12,8 @@ class Edge {
     int destination;
     double weight;
 
-    public Edge(int source, int destination, double weight) {
+    public Edge(int source, int destination, double weight)
+    {
         this.source = source;
         this.destination = destination;
         this.weight = weight;
@@ -25,12 +26,6 @@ public class MaxCutSolver {
         // Implement stopping criterion logic
         return false; // Change this condition accordingly
     }
-
-//    static SolutionPair semiGreedyMaxCut() {
-//        // Implement SEMI-GREEDY-MAXCUT logic
-//        return null; // Placeholder
-//    }
-
 
     // Method to find the minimum edge weight in the weights array
     static double findMinWeight(double[][] weights) {
@@ -72,6 +67,11 @@ public class MaxCutSolver {
         return max;
     }
 
+    /**
+     *  an approach that combines elements of both greedy and randomized strategies.
+     *  It's not purely greedy because it introduces randomness to the selection process.
+     * **/
+
     static SolutionPair semiGreedyMaxCut(Graph graph, double[][] weights) {
         double alpha = Math.random(); // controls the balance between selecting vertices greedily and randomly. 0<alpha<1
         double Wmin = findMinWeight(weights);
@@ -100,8 +100,8 @@ public class MaxCutSolver {
             allVerticesSet.add(i);
         }
 
-        Set<Integer> union = new HashSet<>(X);
-        union.addAll(Y);
+//        Set<Integer> union = new HashSet<>(X);
+//        union.addAll(Y);
        //While the union of sets X and Y is not equal to the set of all vertices (V):
         // while ( (!X.addAll(Y) )|| ( X.size() < graph.numVertices))
        while ((X.size() + Y.size()) < graph.numVertices)
@@ -115,9 +115,10 @@ public class MaxCutSolver {
 
             // For each vertex v in the set VPrime, calculate the
             // cumulative edge weight sum sigmaX(v) and sigmaY(v) of edges from vertex v to vertices in sets X and Y, respectively.
+               // mane v ekhono X ba Y set e add kori nai
             for (int v : VPrime)
             {
-                for (int u : Y)
+                for (int u : Y)  //cutting edge
                 {
                     sigmaX[v] += weights[v][u];
                 }
@@ -129,8 +130,13 @@ public class MaxCutSolver {
 
             //double newWmin = findMin(sigmaX, sigmaY, VPrime);
             //Calculating new Thresold
-            double newWmin = findMin(sigmaX, VPrime);
-            double newWmax = findMax(sigmaY, VPrime);
+            double newWminX = findMin(sigmaX, VPrime);
+            double newWminY = findMin(sigmaY, VPrime);
+            double newWmaxX = findMax(sigmaX, VPrime);
+            double newWmaxY = findMax(sigmaY, VPrime);
+            double newWmin=Math.min(newWminX,newWminY);
+            double newWmax=Math.min(newWmaxX,newWmaxY);
+
             double newMeu = newWmin + alpha * (newWmax - newWmin);
             //Create a list RCLv of vertices from VPrime that have cumulative edge weights greater than or equal to the new threshold newMeu.
             List<Integer> RCLv = new ArrayList<>();
@@ -142,6 +148,7 @@ public class MaxCutSolver {
            //=========== Random Vertex Selection: ==================
             int vStar = RCLv.get(random.nextInt(RCLv.size()));
             //This vertex is chosen to potentially be added to set X or Y.
+               //jar cut weight beshi
             if (sigmaX[vStar] > sigmaY[vStar])
             {
                 X.add(vStar);
@@ -160,6 +167,8 @@ public class MaxCutSolver {
     /**
      *  used to improve the quality of a solution (S, S') by iteratively swapping vertices
      *  between sets S and S'. The goal is to find a locally optimal solution within the neighborhood of the current solution.
+     *
+     *  introducing randomness to escape local optima and explore a wider solution space.
      * **/
     static SolutionPair localSearchMaxCut(SolutionPair initialSolution, double[][] weights) {
         boolean change = true;
@@ -195,12 +204,12 @@ public class MaxCutSolver {
 
     static SolutionPair selectSolutionFromPool(List<SolutionPair> pool) {
         // Implement solution selection logic from the pool
-        return null; // Placeholder
+        return null;
     }
 
     static SolutionPair pathRelinkingMaxCut(SolutionPair sourceSolution, SolutionPair targetSolution) {
         // Implement PATH-RELINKING-MAXCUT logic
-        return null; // Placeholder
+        return null;
     }
 
     /**
@@ -270,7 +279,8 @@ public class MaxCutSolver {
 
         // Define your stopping criterion
           int count=0;
-        while (count<1)
+          int sameResult=0;
+        while (count<100)
         {
             // Invoke the SEMI-GREEDY-MAXCUT procedure to generate an initial solution (S, S')
             SolutionPair semiGreedySolution = semiGreedyMaxCut(graph,weights);
@@ -301,12 +311,21 @@ public class MaxCutSolver {
                 SBestPrime = localSearchSolution.getSPrime();
                 wBest = w;
             }
+            else if(w==wBest)
+                sameResult++;
+            if(sameResult>15)
+            {
+                System.out.println("Continuously getting same result!!!!!!!!!!!!!!!!");
+                break;
+            }
 
             count++;
         }
 
         // Return the best solution and its weight
-        System.out.println("Best Solution: " + SBest + ", " + SBestPrime);
+        System.out.println("Best Solution: " );
+        System.out.println("S is "+SBest);
+        System.out.println("S' is "+SBestPrime);
         System.out.println("Best Weight: " + wBest);
 
     }
