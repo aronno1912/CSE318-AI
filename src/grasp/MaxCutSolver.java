@@ -167,15 +167,22 @@ public class MaxCutSolver {
         while (change) {
             change = false;
 
-            for (int v = 0; v < weights.length; v++) {
+            for (int v = 0; v < weights.length; v++)
+            {
+                //sigmaS is the sum of edge weights from a definite vertex v to all vertices of opposite Set. that means if SigmaS >SigmaSPrime
+                // it is better to keep the vertex v in the Set S, as cutting edges have more weight
                 double sigmaS = initialSolution.getSigmaS(v);
+                //System.out.println("sigmaS for "+v+" th vertex is "+sigmaS);
                 double sigmaSPrime = initialSolution.getSigmaSPrime(v);
-
-                if (initialSolution.isInS(v) && sigmaSPrime - sigmaS > 0) {
+               // System.out.println("sigmaPrimeS for "+v+" th vertex is "+sigmaSPrime);
+                if (initialSolution.isInS(v) && sigmaSPrime - sigmaS > 0)
+                {
                     initialSolution.removeFromS(v);
                     initialSolution.addToSPrime(v);
                     change = true;
-                } else if (initialSolution.isInSPrime(v) && sigmaS - sigmaSPrime > 0) {
+                }
+                else if (initialSolution.isInSPrime(v) && sigmaS - sigmaSPrime > 0)  //greater than dewa
+                {
                     initialSolution.removeFromSPrime(v);
                     initialSolution.addToS(v);
                     change = true;
@@ -263,7 +270,7 @@ public class MaxCutSolver {
 
         // Define your stopping criterion
           int count=0;
-        while (count<50)
+        while (count<1)
         {
             // Invoke the SEMI-GREEDY-MAXCUT procedure to generate an initial solution (S, S')
             SolutionPair semiGreedySolution = semiGreedyMaxCut(graph,weights);

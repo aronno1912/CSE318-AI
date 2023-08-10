@@ -62,12 +62,12 @@ class SolutionPair {
         SPrime.remove((Integer) vertex);
     }
 
-    //calculates the sum of the weights of the edges connecting the specified vertex with all the vertices in the set S of a solution pair
+    //calculates the sum of the weights of the edges connecting the specified vertex with all the vertices in the set SPrime of a solution pair
     //This is an essential component in determining whether moving the vertex to the other set (S') could lead to a better cut weight.
     public double getSigmaS(int vertex)
     {
         double sigmaS = 0.0;
-        for (int u : S) {
+        for (int u : SPrime) {
             sigmaS += weights[vertex][u];
         }
         return sigmaS;
@@ -75,7 +75,7 @@ class SolutionPair {
 
     public double getSigmaSPrime(int vertex) {
         double sigmaSPrime = 0.0;
-        for (int u : SPrime) {
+        for (int u : S) {
             sigmaSPrime += weights[vertex][u];
         }
         return sigmaSPrime;
