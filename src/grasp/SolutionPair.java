@@ -31,6 +31,7 @@ class SolutionPair {
     private List<Integer> S;
     private List<Integer> SPrime;
     private double[][] weights;
+    int howManyIteration; //just to track number of iterations in local search
 
     public SolutionPair(List<Integer> S, List<Integer> SPrime, double[][] weights) {
         this.S = S;

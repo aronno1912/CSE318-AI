@@ -21,12 +21,6 @@ class Edge {
 }
 public class MaxCutSolver {
 
-
-    static boolean stoppingCriterionMet() {
-        // Implement stopping criterion logic
-        return false; // Change this condition accordingly
-    }
-
     // Method to find the minimum edge weight in the weights array
     static double findMinWeight(double[][] weights) {
         double minWeight = Double.POSITIVE_INFINITY;
@@ -50,7 +44,8 @@ public class MaxCutSolver {
     }
 
     // Method to find the minimum value in the arrays within a subset of vertices
-    static double findMin(double[] array, Set<Integer> subset) {
+    static double findMin(double[] array, Set<Integer> subset)
+    {
         double min = Double.POSITIVE_INFINITY;
         for (int vertex : subset) {
             min = Math.min(min, array[vertex]);
@@ -59,7 +54,8 @@ public class MaxCutSolver {
     }
 
     // Method to find the maximum value in the arrays within a subset of vertices
-    static double findMax(double[] array, Set<Integer> subset) {
+    static double findMax(double[] array, Set<Integer> subset)
+    {
         double max = Double.NEGATIVE_INFINITY;
         for (int vertex : subset) {
             max = Math.max(max, array[vertex]);
@@ -68,77 +64,78 @@ public class MaxCutSolver {
     }
 
 
- /***************************  Implementation of normal  greedy approach  ******************************************************/
+    /***************************  Implementation of normal  greedy approach  ******************************************************/
 
- static SolutionPair greedyApproach(Graph graph, double[][] weights) {
-     Set<Integer> X = new HashSet<>();
-     Set<Integer> Y = new HashSet<>();
-     Edge[] largestEdges = new Edge[graph.numVertices + 1];
-
-     // Find largest-weight edge for each vertex
-     for (int i = 1; i <= graph.numVertices; i++)
-     {
-         double maxWeight = Double.NEGATIVE_INFINITY;
-         int maxNeighbor = -1;
-
-         for (int j = 1; j <= graph.numVertices; j++)
-         {
-             if (i != j && weights[i][j] > maxWeight) {
-                 maxWeight = weights[i][j];
-                 maxNeighbor = j;
-             }
-         }
-
-         largestEdges[i] = new Edge(i, maxNeighbor, maxWeight);
-     }
-
-     // Place one vertex to each partition X and Y
-     X.add(largestEdges[1].source);
-     Y.add(largestEdges[1].destination);
-
-     // Iterate through remaining vertices
-     for (int i = 2; i <= graph.numVertices; i++)
-     {
-         int vertex = largestEdges[i].source;
-         double addToXWeight = 0;
-         double addToYWeight = 0;
-
-         for (int j : Y) {
-             addToXWeight += weights[vertex][j];
-         }
-
-         for (int j : X) {
-             addToYWeight += weights[vertex][j];
-         }
-
-         if (addToXWeight > addToYWeight) {
-             X.add(vertex);
-         } else {
-             Y.add(vertex);
-         }
-     }
-
-     return new SolutionPair(new ArrayList<>(X), new ArrayList<>(Y), weights);
- }
-
-
-/*************************************** Purely Randomized approach ****************************************************************/
-
-static SolutionPair randomizedApproach(Graph graph, double[][] weights)
-{
-    Set<Integer> X = new HashSet<>();
-    Set<Integer> Y = new HashSet<>();
-    for (int i = 1; i <= graph.numVertices; i++)
+    static SolutionPair greedyApproach(Graph graph, double[][] weights)
     {
-        Random random = new Random();
-        int randomInt = random.nextInt(2);  // Generates 0 or 1
-        if(randomInt==0)
-            X.add(i);
-        else
-            Y.add(i);
+        Set<Integer> X = new HashSet<>();
+        Set<Integer> Y = new HashSet<>();
+        Edge[] largestEdges = new Edge[graph.numVertices + 1];
+
+        // Find largest-weight edge for each vertex
+        for (int i = 1; i <= graph.numVertices; i++)
+        {
+            double maxWeight = Double.NEGATIVE_INFINITY;
+            int maxNeighbor = -1;
+
+            for (int j = 1; j <= graph.numVertices; j++)
+            {
+                if (i != j && weights[i][j] > maxWeight) {
+                    maxWeight = weights[i][j];
+                    maxNeighbor = j;
+                }
+            }
+
+            largestEdges[i] = new Edge(i, maxNeighbor, maxWeight);
+        }
+
+        // Place one vertex to each partition X and Y
+        X.add(largestEdges[1].source);
+        Y.add(largestEdges[1].destination);
+
+        // Iterate through remaining vertices
+        for (int i = 2; i <= graph.numVertices; i++)
+        {
+            int vertex = largestEdges[i].source;
+            double addToXWeight = 0;
+            double addToYWeight = 0;
+
+            for (int j : Y) {
+                addToXWeight += weights[vertex][j];
+            }
+
+            for (int j : X) {
+                addToYWeight += weights[vertex][j];
+            }
+
+            if (addToXWeight > addToYWeight) {
+                X.add(vertex);
+            } else {
+                Y.add(vertex);
+            }
+        }
+
+        return new SolutionPair(new ArrayList<>(X), new ArrayList<>(Y), weights);
     }
-    return new SolutionPair(new ArrayList<>(X), new ArrayList<>(Y), weights);
-}
+
+
+    /*************************************** Purely Randomized approach ****************************************************************/
+
+    static SolutionPair randomizedApproach(Graph graph, double[][] weights)
+    {
+        Set<Integer> X = new HashSet<>();
+        Set<Integer> Y = new HashSet<>();
+        for (int i = 1; i <= graph.numVertices; i++)
+        {
+            Random random = new Random();
+            int randomInt = random.nextInt(2);  // Generates 0 or 1
+            if(randomInt==0)
+                X.add(i);
+            else
+                Y.add(i);
+        }
+        return new SolutionPair(new ArrayList<>(X), new ArrayList<>(Y), weights);
+    }
 
 
     /**
@@ -146,16 +143,18 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
      *  It's not purely greedy because it introduces randomness to the selection process.
      * **/
 
-    static SolutionPair semiGreedyMaxCut(Graph graph, double[][] weights) {
+    static SolutionPair semiGreedyMaxCut(Graph graph, double[][] weights)
+    {
         double alpha = Math.random(); // controls the balance between selecting vertices greedily and randomly. 0<alpha<1
         double Wmin = findMinWeight(weights);
         double Wmax = findMaxWeight(weights);
         //Calculate the threshold value meu
         //This threshold value helps decide whether an edge should be considered for selection based on its weight.
         double meu = Wmin + alpha * (Wmax - Wmin);
-       //Create a Restricted Candidate List (RCLe) containing edges that have weights greater than or equal to the calculated meu.
+        //Create a Restricted Candidate List (RCLe) containing edges that have weights greater than or equal to the calculated meu.
         List<Edge> RCLe = new ArrayList<>();
-        for (Edge edge : graph.edges) {
+        for (Edge edge : graph.edges)
+        {
             if (weights[edge.source][edge.destination] >= meu) {
                 RCLe.add(edge);
             }
@@ -174,9 +173,9 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
             allVerticesSet.add(i);
         }
 
-       //While the union of sets X and Y is not equal to the set of all vertices (V):
-       while ((X.size() + Y.size()) < graph.numVertices)
-           {
+        //While the union of sets X and Y is not equal to the set of all vertices (V):
+        while ((X.size() + Y.size()) < graph.numVertices)
+        {
             Set<Integer> VPrime = new HashSet<>(allVerticesSet);
             VPrime.removeAll(X);
             VPrime.removeAll(Y);
@@ -186,7 +185,7 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
 
             // For each vertex v in the set VPrime, calculate the
             // cumulative edge weight sum sigmaX(v) and sigmaY(v) of edges from vertex v to vertices in sets X and Y, respectively.
-               // mane v ekhono X ba Y set e add kori nai
+            // mane v ekhono X ba Y set e add kori nai
             for (int v : VPrime)
             {
                 for (int u : Y)  //cutting edge
@@ -216,10 +215,10 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
                     RCLv.add(v);
                 }
             }
-           //=========== Random Vertex Selection: ==================
+            //=========== Random Vertex Selection: ==================
             int vStar = RCLv.get(random.nextInt(RCLv.size()));
             //This vertex is chosen to potentially be added to set X or Y.
-               //jar cut weight beshi
+            //jar cut weight beshi
             if (sigmaX[vStar] > sigmaY[vStar])
             {
                 X.add(vStar);
@@ -243,10 +242,11 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
      * **/
     static SolutionPair localSearchMaxCut(SolutionPair initialSolution, double[][] weights) {
         boolean change = true;
-
+        //int counter=0;
+        initialSolution.howManyIteration=0;
         while (change) {
             change = false;
-
+            initialSolution.howManyIteration++;
             for (int v = 1; v < weights.length; v++)
             {
                 //sigmaS is the sum of edge weights from a definite vertex v to all vertices of opposite Set. that means if SigmaS >SigmaSPrime
@@ -254,7 +254,7 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
                 double sigmaS = initialSolution.getSigmaS(v);
                 //System.out.println("sigmaS for "+v+" th vertex is "+sigmaS);
                 double sigmaSPrime = initialSolution.getSigmaSPrime(v);
-               // System.out.println("sigmaPrimeS for "+v+" th vertex is "+sigmaSPrime);
+                // System.out.println("sigmaPrimeS for "+v+" th vertex is "+sigmaSPrime);
                 if (initialSolution.isInS(v) && sigmaSPrime - sigmaS > 0)
                 {
                     initialSolution.removeFromS(v);
@@ -291,7 +291,6 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
 
 
 
-
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
@@ -320,16 +319,18 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
         double wBest = Double.NEGATIVE_INFINITY;  //This variable will store the maximum cut weight found.
         double randCutWgt=0.0;
         double semiGreedyCutWgt=0.0;
-          int count=0;
-          int sameResult=0;
-          long sumOfSemiGreedy=0;
-          long  sumOfRand=0;
+        int count=0;
+        int sameResult=0;
+        long sumOfSemiGreedy=0;
+        long  sumOfRand=0;
+        long sumOfLocalSearchBest=0;
+        int localSearchAvgCounter=0;
         SolutionPair greedySol = greedyApproach(graph,weights);
         double greedyCutWgt=calculateCutWeight(greedySol,weights);
         System.out.println("In greedy approach value is : "+greedyCutWgt);
 
 
-        while (count<50)
+        while (count<100)
         {
 
             SolutionPair randSol = randomizedApproach(graph,weights);
@@ -343,23 +344,21 @@ static SolutionPair randomizedApproach(Graph graph, double[][] weights)
             //Improve the current solution (S, S') using the LOCAL-SEARCH-MAXCUT procedure.
             SolutionPair localSearchSolution = localSearchMaxCut(semiGreedySolution,weights);
             double w = calculateCutWeight(localSearchSolution,weights);
+            // ============ for report ===================
+            sumOfLocalSearchBest+=w;
+            localSearchAvgCounter+=localSearchSolution.howManyIteration;
+            //============================
             if (w > wBest)
             {
                 wBest = w;
             }
-//            else if(w==wBest)
-//                sameResult++;
-//            if(sameResult>15)
-//            {
-//                System.out.println("Continuously getting same result!!!!!!!!!!!!!!!!");
-//                break;
-//            }
-
             count++;
         }
         System.out.println("In purely Randomized approach value is : "+sumOfRand/count);
         System.out.println("In SemiGreedy approach value is : "+sumOfSemiGreedy/count);
         // Return the best solution and its weight
+        System.out.println("In local Search approach iteration is : "+localSearchAvgCounter/count);
+        System.out.println("In local Search approach value is : "+sumOfLocalSearchBest/count);
         System.out.println("Grasp Best Weight: " + wBest);
 
     }
