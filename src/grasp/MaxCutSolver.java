@@ -63,56 +63,83 @@ public class MaxCutSolver {
         return max;
     }
 
+    static Edge findLargestEdge(Graph graph, double[][] weights) {
+        Edge largestEdge = null;
+        double maxWeight = Double.NEGATIVE_INFINITY;
+
+        for (int i = 1; i <= graph.numVertices; i++) {
+            for (int j = i + 1; j <= graph.numVertices; j++) {
+                if (weights[i][j] > maxWeight) {
+                    maxWeight = weights[i][j];
+                    largestEdge = new Edge(i, j, maxWeight);
+                }
+            }
+        }
+
+        return largestEdge;
+    }
+
 
     /***************************  Implementation of normal  greedy approach  ******************************************************/
 
-    static SolutionPair greedyApproach(Graph graph, double[][] weights)
-    {
+
+    static SolutionPair greedyApproach(Graph graph, double[][] weights) {
         Set<Integer> X = new HashSet<>();
         Set<Integer> Y = new HashSet<>();
-        Edge[] largestEdges = new Edge[graph.numVertices + 1];
+        Edge largestEdge = findLargestEdge(graph, weights);
 
-        // Find largest-weight edge for each vertex
-        for (int i = 1; i <= graph.numVertices; i++)
+        // Place the endpoints of the largest edge in X and Y
+        X.add(largestEdge.source);
+        Y.add(largestEdge.destination);
+
+        // vPrime is basically set of remaining vertices
+        Set<Integer> VPrime = new HashSet<>();
+        for (int i = 1; i <= graph.numVertices; i++) {
+            VPrime.add(i);
+        }
+        VPrime.remove(largestEdge.source);
+        VPrime.remove(largestEdge.destination);
+
+
+
+        while ((X.size() + Y.size()) < graph.numVertices)
         {
-            double maxWeight = Double.NEGATIVE_INFINITY;
-            int maxNeighbor = -1;
-
-            for (int j = 1; j <= graph.numVertices; j++)
-            {
-                if (i != j && weights[i][j] > maxWeight) {
-                    maxWeight = weights[i][j];
-                    maxNeighbor = j;
+            double[] sigmaX = new double[graph.numVertices + 1];
+            double[] sigmaY = new double[graph.numVertices + 1];
+            // For each vertex v in the set VPrime, calculate the
+            // cumulative edge weight sum sigmaX(v) and sigmaY(v) of edges from vertex v to vertices in sets X and Y, respectively.
+            for (int v : VPrime) {
+                for (int u : Y)
+                {
+                    sigmaX[v] += weights[v][u];
+                }
+                for (int u : X)
+                {
+                    sigmaY[v] += weights[v][u];
                 }
             }
 
-            largestEdges[i] = new Edge(i, maxNeighbor, maxWeight);
-        }
+            // Find the vertex v from VPrime with the maximum gain
+            int vertexWithMaxGain = -1;
+            double maxGain = Double.NEGATIVE_INFINITY;
 
-        // Place one vertex to each partition X and Y
-        X.add(largestEdges[1].source);
-        Y.add(largestEdges[1].destination);
-
-        // Iterate through remaining vertices
-        for (int i = 2; i <= graph.numVertices; i++)
-        {
-            int vertex = largestEdges[i].source;
-            double addToXWeight = 0;
-            double addToYWeight = 0;
-
-            for (int j : Y) {
-                addToXWeight += weights[vertex][j];
+            for (int v : VPrime) {
+                double gain = Math.max(sigmaX[v], sigmaY[v]);
+                if (gain > maxGain) {
+                    maxGain = gain;
+                    vertexWithMaxGain = v;
+                }
             }
 
-            for (int j : X) {
-                addToYWeight += weights[vertex][j];
-            }
-
-            if (addToXWeight > addToYWeight) {
-                X.add(vertex);
+            // Add the vertex with maximum gain to the appropriate partition
+            if (sigmaX[vertexWithMaxGain] > sigmaY[vertexWithMaxGain]) {
+                X.add(vertexWithMaxGain);
             } else {
-                Y.add(vertex);
+                Y.add(vertexWithMaxGain);
             }
+
+            VPrime.remove(vertexWithMaxGain);
+
         }
 
         return new SolutionPair(new ArrayList<>(X), new ArrayList<>(Y), weights);
@@ -167,7 +194,6 @@ public class MaxCutSolver {
         Set<Integer> Y = new HashSet<>();
         X.add(randomEdge.source);
         Y.add(randomEdge.destination);
-        // 0  indexing
         Set<Integer> allVerticesSet = new HashSet<>();
         for (int i = 1; i <= graph.numVertices; i++) {
             allVerticesSet.add(i);
@@ -236,15 +262,16 @@ public class MaxCutSolver {
 
     /**
      *  used to improve the quality of a solution (S, S') by iteratively swapping vertices
-     *  between sets S and S'. The goal is to find a locally optimal solution within the neighborhood of the current solution.
+     *  between sets S and S'. The goal is to find a locally optimal solution of the current solution.
      *
-     *  introducing randomness to escape local optima and explore a wider solution space.
+     *
      * **/
     static SolutionPair localSearchMaxCut(SolutionPair initialSolution, double[][] weights) {
         boolean change = true;
         //int counter=0;
         initialSolution.howManyIteration=0;
-        while (change) {
+        while (change)
+        {
             change = false;
             initialSolution.howManyIteration++;
             for (int v = 1; v < weights.length; v++)
@@ -320,7 +347,6 @@ public class MaxCutSolver {
         double randCutWgt=0.0;
         double semiGreedyCutWgt=0.0;
         int count=0;
-        int sameResult=0;
         long sumOfSemiGreedy=0;
         long  sumOfRand=0;
         long sumOfLocalSearchBest=0;
@@ -330,7 +356,7 @@ public class MaxCutSolver {
         System.out.println("In greedy approach value is : "+greedyCutWgt);
 
 
-        while (count<100)
+        while (count<10)
         {
 
             SolutionPair randSol = randomizedApproach(graph,weights);
