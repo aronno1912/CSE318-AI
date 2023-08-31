@@ -1,0 +1,37 @@
+  public static TreeNode buildDecisionTree(List<Map<String, String>> examples, List<String> attributes) {
+        if (examples.isEmpty()) {
+            // Return a leaf node with default classification
+            TreeNode leafNode = new TreeNode("");
+            leafNode.setClassification("unknown");
+            return leafNode;
+        }
+
+        if (allExamplesHaveSameClassification(examples)) {
+            // Return a leaf node with the common classification
+            TreeNode leafNode = new TreeNode("");
+            leafNode.setClassification(examples.get(0).get("classification"));
+            return leafNode;
+        }
+
+        if (attributes.isEmpty()) {
+            // Return a leaf node with the most common classification
+            String mostCommonClassification = getMostCommonClassification(examples);
+            TreeNode leafNode = new TreeNode("");
+            leafNode.setClassification(mostCommonClassification);
+            return leafNode;
+        }
+
+        String bestAttribute = chooseAttribute(attributes, examples);
+        TreeNode root = new TreeNode(bestAttribute);
+
+        for (String attributeValue : getDistinctAttributeValues(bestAttribute, examples)) {
+            List<Map<String, String>> filteredExamples = filterExamples(bestAttribute, attributeValue, examples);
+            List<String> remainingAttributes = new ArrayList<>(attributes);
+            remainingAttributes.remove(bestAttribute);
+
+            TreeNode childNode = buildDecisionTree(filteredExamples, remainingAttributes);
+            root.addChild(attributeValue, childNode);
+        }
+
+        return root;
+    }
