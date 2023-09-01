@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 public class DecisionTree
 {
+    static Map<String, List<String>> allAttributeValues = new HashMap<>();
   /***************************    Train the tree  *******************************************************/
     public static TreeNode decisionTreeLearning(List<Map<String, String>> examples, List<String> attributes, List<Map<String, String>> parentExamples) {
 
@@ -15,7 +16,7 @@ public class DecisionTree
          * are passed along in the variable parent examples.
          * **/
         if (examples.isEmpty())
-        {  // System.out.println("example empty");
+        {   //System.out.println("example empty");
             return pluralityValue(parentExamples);
         }
         /**
@@ -31,9 +32,10 @@ public class DecisionTree
         /**
          *  If there are no attributes left, but both positive and negative examples,
          * The best we can do is return the plurality classification of the remaining example**/
+        // for noisy user input
         else if (attributes.isEmpty())
         {
-           // System.out.println("att empty");
+            //System.out.println("att empty");
             return pluralityValue(examples);
 
         }
@@ -48,8 +50,9 @@ public class DecisionTree
             List<String> remainingAttributes = new ArrayList<>(attributes); // Make a copy of attributes
             remainingAttributes.remove(A);
 
-            for (String v_k : getDistinctValues(A, examples))
-            {   //exs is the new example set on which a new subtree will be constructed
+            for (String v_k : allAttributeValues.get(A))
+            {
+                //exs is the new example set on which a new subtree will be constructed
                 List<Map<String, String>> exs = filterExamples(A, v_k, examples);
                 TreeNode subtree = decisionTreeLearning(exs, new ArrayList<>(remainingAttributes), examples);
                 tree.children.put(A + " = " + v_k, subtree);
@@ -104,7 +107,7 @@ public class DecisionTree
      * takes an attribute name and a list of examples (data points) as input. Its purpose is to split the list of examples into
      * sublists based on the values of the specified attribute. It returns a map where the keys are the distinct attribute values, and the
      * corresponding values are lists of examples that have that attribute value.*/
-
+    //basically constructs subtrees for different values of an attribute... like door=2,door=2,door=4
     public static Map<String, List<Map<String, String>>>
     splitExamplesByAttributeValue(String attribute, List<Map<String, String>> examples)
     {
@@ -116,29 +119,36 @@ public class DecisionTree
         return attributeValueExamplesMap;
     }
 
-    public static double calculateEntropy(List<Map<String, String>> examples) {
-        Map<String, Integer> classCounts = new HashMap<>();
-        for (Map<String, String> example : examples) {
+    public static double calculateEntropy(List<Map<String, String>> examples)
+    {
+        Map<String, Integer> classCounts = new HashMap<>();  //to store the counts of each unique classification present in the examples.
+        for (Map<String, String> example : examples)
+        {
             String classification = example.get("classification");
+            //if the class label is already in the map. If it is, it increments the count by 1. If it's not, it initializes the count to 1.
             classCounts.put(classification, classCounts.getOrDefault(classification, 0) + 1);
         }
 
         double entropy = 0.0;
         int totalExamples = examples.size();
-        for (String classification : classCounts.keySet()) {
+        for (String classification : classCounts.keySet())
+        {
             double probability = (double) classCounts.get(classification) / totalExamples;
             entropy -= probability * Math.log(probability) / Math.log(2); // Using base 2 logarithm
         }
 
         return entropy;
     }
-    public static double calculateInformationGain(String attribute, List<Map<String, String>> examples) {
+    //calculation of information gain
+    public static double calculateInformationGain(String attribute, List<Map<String, String>> examples)
+    {
         double totalEntropy = calculateEntropy(examples);
 
         Map<String, List<Map<String, String>>> attributeValueExamplesMap = splitExamplesByAttributeValue(attribute, examples);
 
         double weightedEntropy = 0.0;
-        for (String attributeValue : attributeValueExamplesMap.keySet()) {
+        for (String attributeValue : attributeValueExamplesMap.keySet())
+        {
             List<Map<String, String>> attributeExamples = attributeValueExamplesMap.get(attributeValue);
             double attributeFraction = (double) attributeExamples.size() / examples.size();
             weightedEntropy += attributeFraction * calculateEntropy(attributeExamples);
@@ -147,13 +157,17 @@ public class DecisionTree
         return totalEntropy - weightedEntropy;
     }
 
+    //choose that attribute whose information gain is highest!!!!!!!!!!!!!!!!!!!!
+
     public static String argMaxImportance(List<String> attributes, List<Map<String, String>> examples) {
         double maxInformationGain = Double.NEGATIVE_INFINITY;
         String bestAttribute = null;
 
-        for (String attribute : attributes) {
+        for (String attribute : attributes)
+        {
             double informationGain = calculateInformationGain(attribute, examples);
-            if (informationGain > maxInformationGain) {
+            if (informationGain > maxInformationGain)
+            {
                 maxInformationGain = informationGain;
                 bestAttribute = attribute;
             }
@@ -162,19 +176,24 @@ public class DecisionTree
         return bestAttribute;
     }
 
-    /****
-     *
-     * This method iterates through the examples and collects the distinct attribute values for the specified attribute.
-     * It uses a HashSet to ensure uniqueness of values and then converts the set back to an ArrayList before returning it.
-     */
-    public static List<String> getDistinctValues(String attribute, List<Map<String, String>> examples) {
-        Set<String> distinctValues = new HashSet<>();
-        for (Map<String, String> example : examples) {
+    public static String classifyExample(TreeNode tree, Map<String, String> example)
+    {
+        //traverse  the tree to get the classification
+        while (!tree.isLeaf())
+        {
+            String attribute = tree.getAttribute();
+            // System.out.println("Current attribute: " + attribute);
+
             String attributeValue = example.get(attribute);
-            distinctValues.add(attributeValue);
+            //System.out.println("Current attribute value: " + attributeValue);
+            String check=attribute + " = " + attributeValue;
+            tree = tree.getChild(check);
+                // System.out.println("Found child node for attribute value: " + attributeValue);
         }
-        return new ArrayList<>(distinctValues);
+        return tree.getClassification();
     }
+
+
     //takes an attribute name, an attribute value, and a list of examples (data points) as input. Its purpose is to
     // filter the list of examples and return a new list containing only the examples that have a specific attribute value for the specified attribute.
     public static List<Map<String, String>>
@@ -191,44 +210,19 @@ public class DecisionTree
         return filteredExamples;
     }
 
-//    public static String classifyExample(TreeNode tree, Map<String, String> example) {
-//        while (!tree.isLeaf())
-//        {
-//            String attribute = tree.getAttribute();
-//            System.out.println(attribute);
-//            String attributeValue = example.get(attribute);
-//            System.out.println(attributeValue);
-//            if (tree.hasChild(attributeValue)) {
-//                tree = tree.getChild(attributeValue);
-//                System.out.println("got one");
-//            } else {
-//                // If the attribute value is not found, return a default classification
-//                return "unknown";
-//            }
-//        }
-//        return tree.getClassification();
-//    }
-
-    public static String classifyExample(TreeNode tree, Map<String, String> example) {
-        while (!tree.isLeaf()) {
-            String attribute = tree.getAttribute();
-           // System.out.println("Current attribute: " + attribute);
-
+//       / * This method iterates through the examples and collects the distinct attribute values for the specified attribute.
+//     * It uses a HashSet to ensure uniqueness of values and then converts the set back to an ArrayList before returning it.
+//     */
+    /**   if manually didn't want to store all attributes values...only works with examples attributes values              **/
+    public static List<String> getDistinctValues(String attribute, List<Map<String, String>> examples) {
+        Set<String> distinctValues = new HashSet<>();
+        for (Map<String, String> example : examples) {
             String attributeValue = example.get(attribute);
-            //System.out.println("Current attribute value: " + attributeValue);
-            String check=attribute + " = " + attributeValue;
-            if (tree.hasChild(check))
-            {
-                tree = tree.getChild(check);
-               // System.out.println("Found child node for attribute value: " + attributeValue);
-            } else {
-                //System.out.println("Child node not found for attribute value: " + attributeValue);
-                return "unknown";
-            }
+            distinctValues.add(attributeValue);
         }
-        //System.out.println("Predicted classification: " + tree.getClassification());
-        return tree.getClassification();
+        return new ArrayList<>(distinctValues);
     }
+
 
     public static List<Map<String, String>> loadDatasetFromFile(String filename) {
         //attribute,values
@@ -286,8 +280,52 @@ public class DecisionTree
 
 public static void main(String[] args) {
     // Load the dataset from the file
+    /**  Made a list of hashmaps
+     * [buying-->vhigh, maint-->vhigh, doors-->2, persons-->2, lug_boot-->low, safety-->high, classification-->acc], [.......]
+     * **/
     List<Map<String, String>> examples = loadDatasetFromFile("C:\\Users\\Lotus\\AI offlines\\src\\input.txt");
     List<String> attributes = Arrays.asList("buying", "maint", "doors", "persons", "lug_boot", "safety");
+    // Define the possible values for each attribute
+    List<String> buyingValues = new ArrayList<>();
+    buyingValues.add("vhigh");
+    buyingValues.add("high");
+    buyingValues.add("med");
+    buyingValues.add("low");
+
+    List<String> maintValues = new ArrayList<>();
+    maintValues.add("vhigh");
+    maintValues.add("high");
+    maintValues.add("med");
+    maintValues.add("low");
+
+    List<String> doorsValues = new ArrayList<>();
+    doorsValues.add("2");
+    doorsValues.add("3");
+    doorsValues.add("4");
+    doorsValues.add("5more");
+
+    List<String> personsValues = new ArrayList<>();
+    personsValues.add("2");
+    personsValues.add("4");
+    personsValues.add("more");
+
+    List<String> lugBootValues = new ArrayList<>();
+    lugBootValues.add("small");
+    lugBootValues.add("med");
+    lugBootValues.add("big");
+
+    List<String> safetyValues = new ArrayList<>();
+    safetyValues.add("low");
+    safetyValues.add("med");
+    safetyValues.add("high");
+
+    // Put attribute values in the HashMap
+    allAttributeValues.put("buying", buyingValues);
+    allAttributeValues.put("maint", maintValues);
+    allAttributeValues.put("doors", doorsValues);
+    allAttributeValues.put("persons", personsValues);
+    allAttributeValues.put("lug_boot", lugBootValues);
+    allAttributeValues.put("safety", safetyValues);
 
     // Define the number of runs for the experiment
     int numRuns = 20;
@@ -298,7 +336,7 @@ public static void main(String[] args) {
     // Repeat the experiment for the specified number of runs
     for (int run = 0; run < numRuns; run++)
     {
-       /**Shuffle randomly and then divide into 80% for training set and 20% for testSet*********/
+       /**   Shuffle randomly and then divide into 80% for training set and 20% for testSet  *********/
         Collections.shuffle(examples);
 
         // Determine the split index for training and testing sets
@@ -327,8 +365,8 @@ public static void main(String[] args) {
         // Calculate accuracy for the current run
         double accuracy = (double) correctPredictions / testingExamples.size() * 100;
         accuracies[run] = accuracy;
-        int prun=run+1;
-        System.out.println("Run "+prun+" complete!!!");
+        int printrun=run+1;
+        System.out.println("Run "+printrun+" complete!!!");
     }
 
     // Calculate mean accuracy and standard deviation
