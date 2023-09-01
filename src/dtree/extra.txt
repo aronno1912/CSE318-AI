@@ -35,3 +35,50 @@
 
         return root;
     }
+
+
+
+        public static void main(String[] args) {
+            //String filePath = System.getProperty("user.dir") + "/input.txt";
+            List<Map<String, String>> examples = loadDatasetFromFile("C:\\Users\\Lotus\\AI offlines\\src\\input.txt");
+            List<String> attributes = Arrays.asList("buying", "maint", "doors", "persons", "lug_boot", "safety");
+            // Shuffle the dataset randomly
+            Collections.shuffle(examples);
+            // Divide the data into training and testing sets (80-20 split)
+            int splitIndex = (int) (examples.size() * 0.8);
+            List<Map<String, String>> trainingExamples = examples.subList(0, splitIndex);
+            List<Map<String, String>> testingExamples = examples.subList(splitIndex, examples.size());
+            //System.out.println(testingExamples);
+
+          /************************************ Train the decision tree ***************************************************/
+            TreeNode root = decisionTreeLearning(trainingExamples, attributes, new ArrayList<>());
+            //printDecisionTree(root, "");
+
+    //        // Classify new input data
+    //        Map<String, String> inputExample = new HashMap<>();
+    //        inputExample.put("buying", "vhigh");
+    //        inputExample.put("maint", "vhigh");
+    //        inputExample.put("doors", "2");
+    //        inputExample.put("persons", "2");
+    //        inputExample.put("lug_boot", "small");
+    //        inputExample.put("safety", "high");
+    //
+    //        String predictedClassification = classifyExample(root, inputExample);
+    //        System.out.println("Predicted classification: " + predictedClassification);
+
+             //Test the decision tree on testing examples
+            int correctPredictions = 0;
+            for (Map<String, String> example : testingExamples) {
+                String predictedClassification = classifyExample(root, example);
+                String actualClassification = example.get("classification");
+                System.out.println("predicted is "+predictedClassification);
+                System.out.println("actual is "+actualClassification);
+                if (predictedClassification.equals(actualClassification)) {
+                    correctPredictions++;
+                }
+            }
+
+            // Calculate accuracy
+            double accuracy = (double) correctPredictions / testingExamples.size() * 100;
+            System.out.println("Accuracy: " + accuracy + "%");
+        }
