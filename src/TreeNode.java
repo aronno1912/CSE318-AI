@@ -20,23 +20,28 @@ class TreeNode {
         this.classification = classification;
     }
 
-    public String getAttribute() {
+    public String getAttribute()
+    {
         return attribute;
     }
 
-    public boolean isLeaf() {
+    public boolean isLeaf()
+    {
         return classification != null;
     }
 
-    public boolean hasChild(String value) {
+    public boolean hasChild(String value)
+    {
         return children.containsKey(value);
     }
 
-    public TreeNode getChild(String value) {
+    public TreeNode getChild(String value)
+    {
         return children.get(value);
     }
 
-    public String getClassification() {
+    public String getClassification()
+    {
         return classification;
     }
 }
